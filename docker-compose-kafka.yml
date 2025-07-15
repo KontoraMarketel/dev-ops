@@ -1,0 +1,41 @@
+name: "kafka-compose"
+services:
+  kafka-controller:
+    image: apache/kafka:4.0.0
+    environment:
+      KAFKA_NODE_ID: 1 # Уникальный id ноды кластера kafka
+      KAFKA_PROCESS_ROLES: controller # Роль ноды, контроллеры управляют кластером, брокеры выполняют работу, можно комбинировать
+      KAFKA_LISTENERS: CONTROLLER://:9093 # Настройки kafka как ей слушать запросы, тут указывается что обычные plain text запросы слушать так то на порту 9092, а разговор с другими нодами и контроллерами по 9093
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER # Указываем какой лисенер будет в роли контроллера, PLAINTEXT - клиентские лисенеры, CONTROLLER - контроллеры
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT # Настройки протоклоа безопасности для лисенеров
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka-controller:9093 # Список контроллеров кластера для голосования за главный контроллер который будет управлять кластером
+    networks:
+      - local
+
+  kafka-broker:
+    image: apache/kafka:4.0.0
+    ports:
+      - "9097:9097"
+    environment:
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_NODE_ID: 2 # Уникальный id ноды кластера kafka
+      KAFKA_PROCESS_ROLES: broker # Роль ноды, контроллеры управляют кластером, брокеры выполняют работу, можно комбинировать
+      KAFKA_LISTENERS: PLAINTEXT://:9092,EXTERNAL://:9097 # Настройки kafka как ей слушать запросы, тут указывается что обычные plain text запросы слушать так то на порту 9092, а разговор с другими нодами и контроллерами по 9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-broker:9092,EXTERNAL://localhost:9097 # Настройка для сообщения клиентам, на каком адресу можно достучаться до кафки от клиентов
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT # Настройки протоклоа безопасности для лисенеров
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka-controller:9093 # Список контроллеров кластера для голосования за главный контроллер который будет управлять кластером
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1 # Настройка репликации служебного топика в котором данные по всем оффсетам, если брокер с топиком выйдет из строя при репликации 1, то все пошло по пизде вася
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1 # Тоже самое что и KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR но уже по транзакциям
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1 # Сколько реплик транзакционного топика должно быть в строю. 1 = работает даже если жив один, но надёжности нет.
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0 # Вася, это время (в миллисекундах), сколько Kafka ждёт, прежде чем начать раздавать партиции консюмерам. 0 = не ждёт никого, раздаёт сразу. Удобно в тестах, но в проде лучше подождать пару секунд, чтобы все консюмеры успели подключиться и не было лишних ребалансов
+      KAFKA_NUM_PARTITIONS: 3 # Количество партиций на топик по умолчанию
+    networks:
+      - local
+      - global
+
+networks:
+  global:
+    external: true
+  local:
+
+
