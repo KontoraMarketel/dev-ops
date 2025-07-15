@@ -21,7 +21,7 @@ services:
       KAFKA_NODE_ID: 2 # Уникальный id ноды кластера kafka
       KAFKA_PROCESS_ROLES: broker # Роль ноды, контроллеры управляют кластером, брокеры выполняют работу, можно комбинировать
       KAFKA_LISTENERS: PLAINTEXT://:9092,EXTERNAL://:9097 # Настройки kafka как ей слушать запросы, тут указывается что обычные plain text запросы слушать так то на порту 9092, а разговор с другими нодами и контроллерами по 9093
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-broker:9092,EXTERNAL://localhost:9097 # Настройка для сообщения клиентам, на каком адресу можно достучаться до кафки от клиентов
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-broker:9092,EXTERNAL://0.0.0.0:9097 # Настройка для сообщения клиентам, на каком адресу можно достучаться до кафки от клиентов
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT # Настройки протоклоа безопасности для лисенеров
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka-controller:9093 # Список контроллеров кластера для голосования за главный контроллер который будет управлять кластером
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1 # Настройка репликации служебного топика в котором данные по всем оффсетам, если брокер с топиком выйдет из строя при репликации 1, то все пошло по пизде вася
