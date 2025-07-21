@@ -9,7 +9,7 @@ services:
     container_name: clickhouse
     ports:
       - "8123:8123"   # HTTP-интерфейс
-      - "9000:9032"   # Native TCP
+      - "9033:9000"   # Native TCP
     volumes:
       - clickhouse_data:/var/lib/clickhouse
     ulimits:
