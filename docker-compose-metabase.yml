@@ -20,6 +20,8 @@ services:
       interval: 5s
       timeout: 3s
       retries: 20
+    networks:
+      - local
 
   metabase:
     image: metabase/metabase:latest
@@ -61,7 +63,15 @@ services:
     volumes:
       # если вдруг понадобится положить кастомные плагины-драйверы
       - metabase-plugins:/plugins
+    networks:
+      - global
+      - local
 
 volumes:
   pgdata:
   metabase-plugins:
+
+networks:
+  global:
+    external: true
+  local:
